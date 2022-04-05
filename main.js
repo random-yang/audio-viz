@@ -3,13 +3,14 @@ import p5 from "p5";
 
 let audioCtx;
 let analyser;
-const width = window.innerWidth;
-const height = window.innerHeight;
+let width = window.innerWidth;
+let height = window.innerHeight;
 const COLOR = {
   blue: "#120EED",
   green: "#17EB96",
   pink: "#F310CF",
   yellow: "#EEF20B",
+  white: "#fff",
 };
 
 // connect mic stream to analyser
@@ -57,21 +58,32 @@ const sketch = (s) => {
   };
 
   const drawTopBar = (dataArray) => {
+    const color1 = s.color(COLOR.green);
+    const color2 = s.color(COLOR.white);
     s.push();
-    s.fill(COLOR.green);
     const dx = width / dataArray.length;
     for (let i = 0; i < dataArray.length; i++) {
-      s.rect(i * dx, 0, dx - 1, dataArray[i]);
+      const mixedColor = s.lerpColor(color1, color2, i / dataArray.length);
+      s.fill(mixedColor);
+      s.rect(i * dx, 0, dx - 1, 1 + dataArray[i]);
     }
     s.pop();
   };
 
   const drawBottomBar = (dataArray) => {
+    const color1 = s.color(COLOR.blue);
+    const color2 = s.color(COLOR.white);
     s.push();
-    s.fill(COLOR.yellow);
     const dx = width / dataArray.length;
     for (let i = 0; i < dataArray.length; i++) {
-      s.rect(width - i * dx, height - dataArray[i], dx - 1, dataArray[i]);
+      const mixedColor = s.lerpColor(color1, color2, i / dataArray.length);
+      s.fill(mixedColor);
+      s.rect(
+        width - i * dx,
+        height - dataArray[i] - 1,
+        dx - 1,
+        1 + dataArray[i]
+      );
     }
     s.pop();
   };
@@ -98,6 +110,30 @@ const sketch = (s) => {
       angle += D_ANGLE;
     }
     s.pop();
+  };
+
+  s.windowResized = () => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    s.resizeCanvas(width, height);
+  };
+
+  s.resze = () => {
+    s.background(0);
+    s.noStroke();
+    if (!analyser) return;
+    const frequencyArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(frequencyArray);
+    // const timeArray = new Uint8Array(analyser.fftSize);
+    // analyser.getByteTimeDomainData(timeArray);
+
+    drawTopBar(frequencyArray);
+    drawBottomBar(frequencyArray);
+    drawCircles(200 + frequencyArray[20], width / 2, height / 2);
+    drawCircles(100 + frequencyArray[30], width / 2, height / 2);
+    drawGreenCircles(30 + frequencyArray[60], width / 2, height / 2);
+    drawRedCircle(10 + frequencyArray[100], width / 2, height / 2);
+    drawParticles(frequencyArray);
   };
 
   s.draw = () => {
