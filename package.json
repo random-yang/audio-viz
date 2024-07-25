@@ -12,5 +12,8 @@
   },
   "dependencies": {
     "q5xjs": "0.0.5"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }

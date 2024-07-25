@@ -1,4 +1,4 @@
-import "./style.css";
+import "../style.css";
 import q5 from "q5xjs";
 import { hexToRGB } from "./utils";
 
